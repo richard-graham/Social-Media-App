@@ -5,41 +5,44 @@ const admin = require('firebase-admin')
 // reverts to default in .firebaserc as no app passed in to initializeApp()
 admin.initializeApp()
 
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-exports.helloWorld = functions.https.onRequest((request, response) => {
- response.send("Hello from Firebase!");
-});
+const express = require('express')
+const app = express()
 
-exports.getScreams = functions.https.onRequest((req, res) => {
+app.get('/screams', (req, res) => {
   admin
     .firestore()
     .collection('screams')
+    .orderBy('createdAt', 'desc')
     .get()
     .then(data => {
+      console.log(data);
       let screams = []
       data.forEach(doc => { // doc = a document reference
-        screams.push(doc.data()) // data() is a function that returns the data within the document
+        screams.push({
+          screamId: doc.id,
+          body: doc.data().body,
+          userHandle: doc.data().userHandle,
+          createdAt: doc.data().createdAt
+        }) // data() is a function that returns the data within the document
       })
       return res.json(screams)
     })
     .catch(err => {
-      console.log(err)
+      res.status(500).json({ error: 'something went wrong '}) // note: changes status code from 200
+      console.error(err)
     })
 })
 
-exports.createScream = functions.https.onRequest((req, res) => {
-  // validate request
-  if(req.method !== 'POST'){
-    return res.status(400).json({ error: 'Method not allowed, use a POST request' })
-  }
-  
+
+
+app.post('/scream', (req, res) => {
+
   const newScream = {
     body: req.body.body,
     userHandle: req.body.userHandle,
-    createdAt: admin.firestore.Timestamp.fromDate(new Date())
+    createdAt: new Date().toISOString() // recognised time type
   } 
+
   admin
     .firestore()
     .collection('screams')
@@ -52,3 +55,7 @@ exports.createScream = functions.https.onRequest((req, res) => {
       console.error(err)
     })
 })
+
+
+
+exports.api = functions.https.onRequest(app)
