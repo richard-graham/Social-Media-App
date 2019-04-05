@@ -18,11 +18,12 @@ const config = {
 const firebase = require('firebase')
 firebase.initializeApp(config)
 
+const db = admin.firestore()
+
 // DB Requests
 
 app.get('/screams', (req, res) => {
-  admin
-    .firestore()
+  db
     .collection('screams')
     .orderBy('createdAt', 'desc')
     .get()
@@ -53,8 +54,7 @@ app.post('/scream', (req, res) => {
     createdAt: new Date().toISOString() // recognised time type
   } 
 
-  admin
-    .firestore()
+  db
     .collection('screams')
     .add(newScream)
     .then(doc => {
@@ -75,16 +75,31 @@ app.post('/signup', (req, res) => {
     handle: req.body.handle,
   }
 
-  // TODO: Validate Data
-
-  firebase.auth()
-    .createUserWithEmailAndPassword(newUser.email, newUser.password)
+  db
+    .doc(`/users/${newUser.handle}`)
+    .get()
+    .then(doc => {
+      if(doc.exists){ // user handle is taken
+        return res.status(400).json({ handle: 'This handle is already taken' })
+      } else {
+        console.log('ping');
+        // create user
+        return firebase
+                .auth()
+                .createUserWithEmailAndPassword(newUser.email, newUser.password)
+      }
+    })
     .then(data => {
-      return res.status(201).json({ message: `user ${data.user.uid} signed up successfully`})
+      // request token
+      return data.user.getIdToken()
+    })
+    .then(token => {
+      // get token
+      return res.status(201).json({ token })
     })
     .catch(err => {
       console.error(err)
-      return res.status(500).json({ error: err.code})
+      return res.status(500).json({ error: err.code })
     })
 })
 
