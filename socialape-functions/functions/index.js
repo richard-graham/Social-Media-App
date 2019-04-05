@@ -1,12 +1,24 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin')
+const app = require('express')()
 
 //init application
 // reverts to default in .firebaserc as no app passed in to initializeApp()
 admin.initializeApp()
 
-const express = require('express')
-const app = express()
+const config = {
+  apiKey: "AIzaSyDy5aSBoHw-9d72gm7OLXXjuE0zH7eNyQ4",
+  authDomain: "social-media-app-632e6.firebaseapp.com",
+  databaseURL: "https://social-media-app-632e6.firebaseio.com",
+  projectId: "social-media-app-632e6",
+  storageBucket: "social-media-app-632e6.appspot.com",
+  messagingSenderId: "754034985074"
+};
+
+const firebase = require('firebase')
+firebase.initializeApp(config)
+
+// DB Requests
 
 app.get('/screams', (req, res) => {
   admin
@@ -34,9 +46,7 @@ app.get('/screams', (req, res) => {
 })
 
 
-
 app.post('/scream', (req, res) => {
-
   const newScream = {
     body: req.body.body,
     userHandle: req.body.userHandle,
@@ -56,6 +66,29 @@ app.post('/scream', (req, res) => {
     })
 })
 
+//Sign Up Route
+app.post('/signup', (req, res) => {
+  const newUser = {
+    email: req.body.email,
+    password: req.body.password,
+    confirmPassword: req.body.confirmPassword,
+    handle: req.body.handle,
+  }
+
+  // TODO: Validate Data
+
+  firebase.auth()
+    .createUserWithEmailAndPassword(newUser.email, newUser.password)
+    .then(data => {
+      return res.status(201).json({ message: `user ${data.user.uid} signed up successfully`})
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).json({ error: err.code})
+    })
+})
 
 
-exports.api = functions.https.onRequest(app)
+
+exports.api = functions.https.onRequest(app) 
+// exports.api = functions.region('europe-west1').https.onRequest(app)
