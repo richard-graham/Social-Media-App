@@ -20,7 +20,66 @@ firebase.initializeApp(config)
 
 const db = admin.firestore()
 
-// DB Requests
+
+
+
+
+// Helper Functions 
+
+const isEmpty = (string) => {
+  if (string.trim() === '') return true
+  else return false 
+}
+
+const isEmail = (email) => {
+  const regEx = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  if(email.match(regEx)){
+    return true
+  } else {
+    return false
+  }
+}
+
+
+// MIDDLEWARE
+
+
+const FBAuth = (req, res, next) => {
+  let idToken 
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')){ 
+    idToken = req.headers.authorization
+                .split('Bearer ')[1] // splits the auth header into an arr, 1st val = 'Bearer ' 2nd val = token
+  } else {
+    console.error('No token found')
+    return res.status(403).json({ error: 'Unauthorized' })
+  }
+
+  admin
+    .auth()
+    .verifyIdToken(idToken)
+    .then(decodedToken => {
+      req.user = decodedToken
+      console.log(decodedToken);
+      return db.collection('users') // handle is not stored in fbauth so need to add manually 
+                .where('userId', '==', req.user.uid)
+                .limit(1)
+                .get()
+    })
+    .then(data => {
+      req.user.handle = data.docs[0] // even though we only request one object it's still returned in docs which is an arr
+                            .data() // extracts the data from the function
+                            .handle
+      return next() // allows the request to proceed
+    })
+    .catch(err => {
+      console.error('Error while verifying token', err)
+      return res.status(403).json(err)
+    })
+}
+
+
+// GET REQUESTS
+
 
 app.get('/screams', (req, res) => {
   db
@@ -47,10 +106,14 @@ app.get('/screams', (req, res) => {
 })
 
 
-app.post('/scream', (req, res) => {
+// POST REQUESTS
+
+
+// Post one scream
+app.post('/scream', FBAuth, (req, res) => {
   const newScream = {
     body: req.body.body,
-    userHandle: req.body.userHandle,
+    userHandle: req.user.handle,
     createdAt: new Date().toISOString() // recognised time type
   } 
 
@@ -68,21 +131,6 @@ app.post('/scream', (req, res) => {
     })
 })
 
-const isEmpty = (string) => {
-  if (string.trim() === '') return true
-  else return false 
-}
-
-const isEmail = (email) => {
-  const regEx = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-  if(email.match(regEx)){
-    return true
-  } else {
-    return false
-  }
-}
-
-
 //Sign Up Route
 app.post('/signup', (req, res) => {
   const newUser = {
@@ -92,7 +140,7 @@ app.post('/signup', (req, res) => {
     handle: req.body.handle,
   }
 
-  // USER VALIDATION
+  // user validation
 
   let errors = {}
 
@@ -108,7 +156,7 @@ app.post('/signup', (req, res) => {
 
   if(Object.keys(errors).length > 0) return res.status(400).json(errors)
 
-  // USER SIGNUP
+  // User signup
 
   db
     .doc(`/users/${newUser.handle}`)
@@ -153,6 +201,8 @@ app.post('/signup', (req, res) => {
     })
 })
 
+// User login
+
 app.post('/login', (req, res) => {
   const user = {
     email: req.body.email,
@@ -174,9 +224,11 @@ app.post('/login', (req, res) => {
     .auth()
     .signInWithEmailAndPassword(user.email, user.password)
     .then(data => {
+      // request user token
       return data.user.getIdToken()
     })
     .then(token => {
+      // send it to the front
       return res.json({ token })
     })
     .catch(err => {
