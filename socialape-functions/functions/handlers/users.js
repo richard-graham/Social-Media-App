@@ -1,4 +1,4 @@
-const { db } = require('../util/admin')
+const { admin, db } = require('../util/admin')
 
 const config = require('../util/config')
 
@@ -18,6 +18,8 @@ exports.signup = (req, res) => {
   const { valid, errors } = validateSignUpData(newUser)
 
   if (!valid) return res.status(400).json(errors)
+
+  const noImg = 'no-img.png'
 
   let token, userId
   db
@@ -44,6 +46,7 @@ exports.signup = (req, res) => {
         handle: newUser.handle,
         email:newUser.email,
         createdAt: new Date().toISOString(),
+        imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${noImg}?alt=media`,
         userId: userId
       }
       return db.doc(`/users/${newUser.handle}`).set(userCredentials)
@@ -96,3 +99,60 @@ exports.login = (req, res) => {
       return res.status(500).json({ error: err.code })
     })
 }
+
+exports.uploadImage = (req, res) => {
+  const BusBoy = require('busBoy')
+  const path = require('path') // default package
+  const os = require('os')
+  const fs = require('fs')
+
+  let imageFileName
+  let imageToBeUploaded = {} 
+
+  const busboy = new BusBoy({ headers: req.headers })
+
+  busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+
+    // console.log('fieldname', fieldname)  image
+    // console.log('filename', filename)    user-image.png   
+    // console.log('mimetype', mimetype)    image/png
+
+    // validation
+
+    if(mimetype !== 'image/jpeg' && mimetype !== 'image/png'){
+      return res.status(400).json({ error: 'Wrong file type submitted' })
+    }
+
+    // img.png or my.img.png -> split string by dots -> select last value
+    const imageExtension = filename.split('.')[filename.split('.').length -1]
+    // 783645987326.png
+    imageFileName = `${Math.round(Math.random()*1000000000)}.${imageExtension}`
+    const filepath = path.join(os.tmpdir(), imageFileName)
+    imageToBeUploaded = { filepath, mimetype}
+    file.pipe(fs.createWriteStream(filepath))
+  })
+  busboy.on('finish', () => {
+    admin.storage().bucket().upload(imageToBeUploaded.filepath, {
+      resumable: false,
+      metadata: {
+        metadata: {
+          contentType: imageToBeUploaded.mimetype
+        }
+      }
+    })
+    .then(() => {
+      // next construct the image url to add it to the user
+      const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`
+      return db.doc(`/users/${req.user.handle}`).update({ imageUrl: imageUrl }) // Note: req.user comes from the FBAuth middleware in index.js
+    })
+    .then(() => {
+      return res.json({ message: 'Image uploaded successfully' })
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).json({ error: err.code })
+    })
+  })
+  busboy.end(req.rawBody)
+}
+
