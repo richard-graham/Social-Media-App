@@ -108,6 +108,8 @@ app.post('/signup', (req, res) => {
 
   if(Object.keys(errors).length > 0) return res.status(400).json(errors)
 
+  // USER SIGNUP
+
   db
     .doc(`/users/${newUser.handle}`)
     .get()
@@ -115,7 +117,6 @@ app.post('/signup', (req, res) => {
       if(doc.exists){ // user handle is taken
         return res.status(400).json({ handle: 'This handle is already taken' })
       } else {
-        console.log('ping');
         // create user
         return firebase
                 .auth()
@@ -144,13 +145,49 @@ app.post('/signup', (req, res) => {
       console.error(err)
       if(err.code === 'auth/email-already-in-use'){
         return res.status(400).json({ email: 'Email is already in use' })
+      } else if(err.code === 'auth/weak-password'){
+        return res.status(400).json({ password: 'Weak password please try again' })
       } else {
         return res.status(500).json({ error: err.code })
       }
     })
 })
 
+app.post('/login', (req, res) => {
+  const user = {
+    email: req.body.email,
+    password: req.body.password
+  }
 
+  // Validation
+
+  let errors = {}
+
+  if(isEmpty(user.email)) errors.email = 'Must not be empty'
+  if(isEmpty(user.password)) errors.password = 'Must not be empty'
+
+  if(Object.keys(errors).length > 0) return res.status(400).json(errors)
+
+  // Login
+
+  firebase
+    .auth()
+    .signInWithEmailAndPassword(user.email, user.password)
+    .then(data => {
+      return data.user.getIdToken()
+    })
+    .then(token => {
+      return res.json({ token })
+    })
+    .catch(err => {
+      console.error(err)
+      if(err.code = "auth/wrong-password") {
+        return res.status(403).json({ general: 'Wrong credentials, please try again' })
+      }
+      return res.status(500).json({ error: err.code })
+    })
+})
 
 exports.api = functions.https.onRequest(app) 
 // exports.api = functions.region('europe-west1').https.onRequest(app)
+
