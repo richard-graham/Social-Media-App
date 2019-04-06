@@ -177,8 +177,8 @@ exports.getUserDetails = (req, res) => {
         return res.status(404).json({ error: 'User not found' })
       }
     })
-    .then(data => {
-      userData.screams = {}
+    .then((data) => {
+      userData.screams = []
       data.forEach(scream => {
         userData.screams.push({
           body: scream.data().body,
@@ -187,7 +187,7 @@ exports.getUserDetails = (req, res) => {
           userImage: scream.data().userImage,
           likeCount: scream.data().likeCount,
           commentCount: scream.data().body,
-          screamId: doc.id
+          screamId: scream.id
         })
       })
       return res.json(userData)
@@ -198,6 +198,7 @@ exports.getUserDetails = (req, res) => {
     })
 }
 
+// UPLOAD IMAGE
 
 exports.uploadImage = (req, res) => {
   const BusBoy = require('busBoy')
@@ -255,3 +256,22 @@ exports.uploadImage = (req, res) => {
   busboy.end(req.rawBody)
 }
 
+// MARK NOTIFICATIONS AS READ
+
+exports.markNotificationsRead = (req, res) => {
+  // when user opens notification dropdown send server arr of id's  -> notifications just seen
+  // and mark as read
+  let batch = db.batch() // batch allows you to update multiple documents
+  req.body.forEach(notificationId => {
+    const notification = db.doc(`/notifications/${notificationId}`)
+    batch.update(notification, { read: true })
+  })
+  batch.commit()
+  .then(() => {
+    res.json({ message: 'Notifications marked as read' })
+  })
+  .catch(err => {
+    console.error(err)
+    return res.status(500).json({ error: err.code })
+  })
+}

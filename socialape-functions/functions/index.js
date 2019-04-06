@@ -21,7 +21,7 @@ const {
   addUserDetails, 
   getAuthenticatedUser,
   getUserDetails,
-  // markNotificationsRead
+  markNotificationsRead
  } = require('./handlers/users')
 
 // Scream routes
@@ -32,11 +32,7 @@ app.post('/scream/:screamId/comment', FBAuth, commentOnScream)
 app.get('/scream/:screamId/like', FBAuth, likeScream)
 app.get('/scream/:screamId/unlike', FBAuth, unlikeScream)
 app.delete('/scream/:screamId', FBAuth, deleteScream)
-// TODO
-// deletescream
-// likescream
-// unlikeScream
-// commentOnScream
+
 
 // User routes
 app.post('/signup', signup)
@@ -45,7 +41,7 @@ app.post('/user/image', FBAuth, uploadImage)
 app.post('/user', FBAuth, addUserDetails)
 app.get('/user', FBAuth, getAuthenticatedUser)
 app.get('/user/:handle', getUserDetails)
-// app.post('/notifications', FBAuth, markNotificationsRead)
+app.post('/notifications', FBAuth, markNotificationsRead)
 
 // Helper Functions 
 
