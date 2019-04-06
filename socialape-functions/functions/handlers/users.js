@@ -8,6 +8,7 @@ firebase.initializeApp(config)
 const { validateSignUpData, validateLoginData, reduceUserDetails } = require('../util/validators')
 
 
+// SIGN UP
 
 exports.signup = (req, res) => {
   const newUser = {
@@ -68,7 +69,7 @@ exports.signup = (req, res) => {
     })
 }
 
-
+// LOGIN
 
 exports.login = (req, res) => {
   const user = {
@@ -102,6 +103,7 @@ exports.login = (req, res) => {
     })
 }
 
+// ADD USER
 
 exports.addUserDetails = (req,res) => {
   let userDetails = reduceUserDetails(req.body)
@@ -117,6 +119,7 @@ exports.addUserDetails = (req,res) => {
     })
 }
 
+// GET OWN USER DETAILS
 
 exports.getAuthenticatedUser = (req, res) => {
   let userData = {}
@@ -150,6 +153,41 @@ exports.getAuthenticatedUser = (req, res) => {
           type: doc.data().type,
           read: doc.data().read,
           notificationId: doc.id
+        })
+      })
+      return res.json(userData)
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).json({ error: err.code })
+    })
+}
+
+// GET ANY USERS DETAILS
+
+exports.getUserDetails = (req, res) => {
+  let userData = {}
+  db.doc(`/users/${req.params.handle}`)
+    .get()
+    .then(doc => {
+      if(doc.exists){
+        userData.user = doc.data()
+        return db.collection('screams').where('userHandle', '==', req.params.handle).orderBy('createdAt', 'desc').get()
+      } else {
+        return res.status(404).json({ error: 'User not found' })
+      }
+    })
+    .then(data => {
+      userData.screams = {}
+      data.forEach(scream => {
+        userData.screams.push({
+          body: scream.data().body,
+          createdAt: scream.data().createdAt,
+          userHandle: scream.data().userHandle,
+          userImage: scream.data().userImage,
+          likeCount: scream.data().likeCount,
+          commentCount: scream.data().body,
+          screamId: doc.id
         })
       })
       return res.json(userData)
