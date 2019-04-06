@@ -2,7 +2,7 @@ const functions = require('firebase-functions');
 const app = require('express')()
 const FBAuth = require('./util/fbAuth')
 
-const db = require('./util/admin')
+const { db } = require('./util/admin')
 
 const { 
   getAllScreams, 
@@ -39,12 +39,12 @@ app.get('/user', FBAuth, getAuthenticatedUser)
 // Helper Functions 
 
 
-exports.api = functions.https.onRequest(app) 
+exports.api = functions.region('us-central1').https.onRequest(app) 
 // exports.api = functions.region('europe-west1').https.onRequest(app)
 
-exports.createNotificationOnLike = functions.firestore.document('likes/{id}')
+exports.createNotificationOnLike = functions.region('us-central1').firestore.document('likes/{id}')
   .onCreate((snapshot) => {
-    db.document(`/screams/${snapshot.data().screamId}`).get()
+    db.doc(`/screams/${snapshot.data().screamId}`).get()
     .then(doc => {
       if(doc.exists){
         return db.doc(`/notifications/${snapshot.id}`).set({
@@ -66,7 +66,7 @@ exports.createNotificationOnLike = functions.firestore.document('likes/{id}')
     })
   })
 
-exports.deleteNotificationOnUnlike = functions.firestore.document('likes/{id}')
+exports.deleteNotificationOnUnlike = functions.region('us-central1').firestore.document('likes/{id}')
   .onDelete((snapshot) => {
     db.doc(`/notifications/${snapshot.id}`)
       .delete()
@@ -79,7 +79,7 @@ exports.deleteNotificationOnUnlike = functions.firestore.document('likes/{id}')
       })
   })
 
-exports.createNotificationOnComment = functions.firestore.document('comments/{id}')
+exports.createNotificationOnComment = functions.region('us-central1').firestore.document('comments/{id}')
   .onCreate((snapshot) => {
     db.document(`/screams/${snapshot.data().screamId}`).get()
     .then(doc => {
