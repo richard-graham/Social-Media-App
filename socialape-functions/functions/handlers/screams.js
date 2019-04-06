@@ -207,7 +207,7 @@ exports.deleteScream = (req, res) => {
   document.get()
     .then(doc => {
       if(!doc.exists){
-        return res.status(404).json({ error: 'FIle not found' })
+        return res.status(404).json({ error: 'Scream not found' })
       }
       if(doc.data().userHandle !== req.user.handle){
         return res.status(403).json({ error: 'Unauthorized' })
