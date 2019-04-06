@@ -18,7 +18,7 @@ app.get('/screams', getAllScreams)
 app.get('/scream/:screamId', getScream)
 app.post('/scream', FBAuth, postOneScream)
 app.post('/scream/:screamId/comment', FBAuth, commentOnScream)
-// app.post('/scream/:screamId/like', FBAuth, likeScream)
+app.post('/scream/:screamId/like', FBAuth, likeScream)
 // app.post('/scream/:screamId/unlike', FBAuth, unlikeScream)
 // TODO
 // deletescream
