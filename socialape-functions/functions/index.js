@@ -43,8 +43,6 @@ app.get('/user', FBAuth, getAuthenticatedUser)
 app.get('/user/:handle', getUserDetails)
 app.post('/notifications', FBAuth, markNotificationsRead)
 
-// Helper Functions 
-
 
 exports.api = functions.region('us-central1').https.onRequest(app) 
 // exports.api = functions.region('europe-west1').https.onRequest(app)
@@ -110,11 +108,39 @@ exports.onUserImageChange = functions.region('us-central1').firestore.document('
     let batch = db.batch()
     return db.collection('screams').where('userHandle', '==', change.before.data().handle).get()
       .then((data) => {
-        data.forEach(doc => { // doc refers to each document the user has created
+        data.forEach((doc) => { // doc refers to each document the user has created
           const scream = db.doc(`/screams/${doc.id}`)
           batch.update(scream, { userImage: change.after.data().imageUrl })
         })
         return batch.commit()
       })
     }
+  })
+
+exports.onScreamDelete = functions.region('us-central1').firestore.document('/screams/${screamId}')
+  .onDelete((snapshot, context) => { // contest has the params that we have in the url
+    const screamId = context.params.screamId
+    let batch = db.batch()
+    return db.collection('comments').where('screamId', '==', screamId).get() // find comments
+      .then(data => {
+        data.forEach(doc => {
+          batch.delete(db.doc(`/comments/${doc.id}`)) // delete comments
+        })
+        return db.collection('likes').where('screamId', '==', screamId) // find likes
+      })
+      .then(data => {
+        data.forEach(doc => {
+          batch.delete(db.doc(`/likes/${doc.id}`)) // delete likes
+        })
+        return db.collection('notifications').where('screamId', '==', screamId) //etc etc
+      })
+      .then(data => {
+        data.forEach(doc => {
+          batch.delete(db.doc(`/notifications/${doc.id}`))
+        })
+        return batch.commit()
+      })
+      .catch(err => {
+        console.error(err)
+      })
   })
