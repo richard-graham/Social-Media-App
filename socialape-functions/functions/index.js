@@ -13,7 +13,16 @@ const {
   unlikeScream,
   deleteScream
 } = require('./handlers/screams')
-const { signup, login, uploadImage, addUserDetails, getAuthenticatedUser } = require('./handlers/users')
+
+const { 
+  signup, 
+  login, 
+  uploadImage, 
+  addUserDetails, 
+  getAuthenticatedUser,
+  // getUserDetails,
+  // markNotificationsRead
+ } = require('./handlers/users')
 
 // Scream routes
 app.get('/screams', getAllScreams)
@@ -35,6 +44,8 @@ app.post('/login', login)
 app.post('/user/image', FBAuth, uploadImage)
 app.post('/user', FBAuth, addUserDetails)
 app.get('/user', FBAuth, getAuthenticatedUser)
+// app.get('/user/:handle', getUserDetails)
+// app.post('/notifications', FBAuth, markNotificationsRead)
 
 // Helper Functions 
 
@@ -81,7 +92,7 @@ exports.deleteNotificationOnUnlike = functions.region('us-central1').firestore.d
 
 exports.createNotificationOnComment = functions.region('us-central1').firestore.document('comments/{id}')
   .onCreate((snapshot) => {
-    db.document(`/screams/${snapshot.data().screamId}`).get()
+    db.doc(`/screams/${snapshot.data().screamId}`).get()
     .then(doc => {
       if(doc.exists){
         return db.doc(`/notifications/${snapshot.id}`).set({
