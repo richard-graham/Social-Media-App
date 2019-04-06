@@ -25,6 +25,7 @@ module.exports = (req, res, next) => {
       req.user.handle = data.docs[0] // even though we only request one object it's still returned in docs which is an arr
                             .data() // extracts the data from the function
                             .handle
+      req.user.imageUrl = data.docs[0].data().imageUrl
       return next() // allows the request to proceed
     })
     .catch(err => {
