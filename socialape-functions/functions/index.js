@@ -99,3 +99,22 @@ exports.createNotificationOnComment = functions.region('us-central1').firestore.
       return // no need to return as function is a database trigger
     })
   })
+
+exports.onUserImageChange = functions.region('us-central1').firestore.document('/users/${userId}')
+  .onUpdate((change) => {
+    console.log(change.before.data());
+    console.log(change.after.data());
+    // changing multiple docs so need to use batch
+    if(change.before.data().imageUrl !== change.after.data().imageUrl){
+    console.log('image has changed');
+    let batch = db.batch()
+    return db.collection('screams').where('userHandle', '==', change.before.data().handle).get()
+      .then((data) => {
+        data.forEach(doc => { // doc refers to each document the user has created
+          const scream = db.doc(`/screams/${doc.id}`)
+          batch.update(scream, { userImage: change.after.data().imageUrl })
+        })
+        return batch.commit()
+      })
+    }
+  })
