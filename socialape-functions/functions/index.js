@@ -98,7 +98,7 @@ exports.createNotificationOnComment = functions.region('us-central1').firestore.
     })
   })
 
-exports.onUserImageChange = functions.region('us-central1').firestore.document('/users/${userId}')
+exports.onUserImageChange = functions.region('us-central1').firestore.document('users/{userId}')
   .onUpdate((change) => {
     console.log(change.before.data());
     console.log(change.after.data());
@@ -114,10 +114,12 @@ exports.onUserImageChange = functions.region('us-central1').firestore.document('
         })
         return batch.commit()
       })
+    } else {
+      return true
     }
   })
 
-exports.onScreamDelete = functions.region('us-central1').firestore.document('/screams/${screamId}')
+exports.onScreamDelete = functions.region('us-central1').firestore.document('screams/{screamId}')
   .onDelete((snapshot, context) => { // contest has the params that we have in the url
     const screamId = context.params.screamId
     let batch = db.batch()
@@ -126,13 +128,13 @@ exports.onScreamDelete = functions.region('us-central1').firestore.document('/sc
         data.forEach(doc => {
           batch.delete(db.doc(`/comments/${doc.id}`)) // delete comments
         })
-        return db.collection('likes').where('screamId', '==', screamId) // find likes
+        return db.collection('likes').where('screamId', '==', screamId).get() // find likes
       })
       .then(data => {
         data.forEach(doc => {
           batch.delete(db.doc(`/likes/${doc.id}`)) // delete likes
         })
-        return db.collection('notifications').where('screamId', '==', screamId) //etc etc
+        return db.collection('notifications').where('screamId', '==', screamId).get() //etc etc
       })
       .then(data => {
         data.forEach(doc => {
