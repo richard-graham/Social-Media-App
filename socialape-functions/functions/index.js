@@ -51,7 +51,7 @@ exports.createNotificationOnLike = functions.region('us-central1').firestore.doc
   .onCreate((snapshot) => {
     return db.doc(`/screams/${snapshot.data().screamId}`).get()
     .then(doc => {
-      if(doc.exists && doc.data().userHandle !== snapshot.data().userHandle){
+      if(doc.exists && doc.data().userHandle !== snapshot.data().userHandle){ // don't send a notification is liking or commenting on their own post
         return db.doc(`/notifications/${snapshot.id}`).set({
           createdAt: new Date().toISOString(),
           recipient: doc.data().userHandle,
