@@ -80,6 +80,7 @@ exports.login = (req, res) => {
   const { valid, errors } = validateLoginData(user)
 
   if (!valid) return res.status(400).json(errors)
+  if(Object.keys(errors).length > 0) return res.status(400).json(errors)
 
   // Login
 
