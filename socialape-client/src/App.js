@@ -30,6 +30,31 @@ const theme = createMuiTheme({
   typography: {
     useNextVariants: true,
   },
+  form: {
+    textAlign: 'center'
+  },
+  icon: {
+    maxWidth: '80px',
+    margin: '20px auto'
+  },
+  pageTitle: {
+    margin: '10px auto',
+  },
+  textField: {
+    margin: '10px auto'
+  },
+  button: {
+    marginTop: 20,
+    position: 'relative'
+  },
+  customError: {
+    color: 'red',
+    fontSize: '0.8rem',
+    margin: '10px auto'
+  },
+  buttonProgress: {
+    position: 'absolute'
+  },
 })
 
 class App extends Component {
