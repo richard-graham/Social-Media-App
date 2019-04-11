@@ -198,7 +198,7 @@ exports.getUserDetails = (req, res) => {
 // UPLOAD IMAGE
 
 exports.uploadImage = (req, res) => {
-  const BusBoy = require('busBoy')
+  const BusBoy = require('busboy')
   const path = require('path') // default package
   const os = require('os')
   const fs = require('fs')
