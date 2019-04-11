@@ -36,7 +36,7 @@ export class signup extends Component {
     const newUserData = {
       email: this.state.email,
       password: this.state.password,
-      confirmPassword: this.state.password,
+      confirmPassword: this.state.confirmPassword,
       handle: this.state.handle
     }
     axios.post('/signup', newUserData)
