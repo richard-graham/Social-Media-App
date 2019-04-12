@@ -72,6 +72,7 @@ class Scream extends Component {
               authenticated
             } 
           } = this.props
+          
     const likeButton = !authenticated ? (
       <MyButton tip='Like'>
         <Link to='/login'>

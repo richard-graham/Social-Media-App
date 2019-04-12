@@ -6,6 +6,7 @@ export const getScreams = () => (dispatch) => {
   dispatch({ type: LOADING_DATA })
   axios.get('/screams')
     .then(res => {
+      console.log('res', res);
       dispatch({ 
         type: SET_SCREAMS, 
         payload: res.data
@@ -20,9 +21,9 @@ export const getScreams = () => (dispatch) => {
 }
 
 //Like a scream
-export const likeScream = (screamId) => dispatch => {
+export const likeScream = (screamId) => (dispatch) => {
   axios.get(`/scream/${screamId}/like`)
-    .then(res => {
+    .then((res) => {
       dispatch({ 
         type: LIKE_SCREAM,
         payload: res.data
@@ -32,9 +33,9 @@ export const likeScream = (screamId) => dispatch => {
 }
 
 //Unlike a scream
-export const unlikeScream = (screamId) => dispatch => {
+export const unlikeScream = (screamId) => (dispatch) => {
   axios.get(`/scream/${screamId}/unlike`)
-    .then(res => {
+    .then((res) => {
       dispatch({ 
         type: UNLIKE_SCREAM,
         payload: res.data

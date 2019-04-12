@@ -14,6 +14,7 @@ export default function(state = initialState, action){
         loading: true
       }
     case SET_SCREAMS:
+    console.log(action.payload);
       return {
         ...state,
         screams: action.payload,

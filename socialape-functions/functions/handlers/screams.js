@@ -14,7 +14,8 @@ exports.getAllScreams = (req, res) => {
           body: doc.data().body,
           userHandle: doc.data().userHandle,
           createdAt: doc.data().createdAt,
-          userImage: doc.data().userImage
+          userImage: doc.data().userImage,
+          likeCount: doc.data().likeCount
         }) // data() is a function that returns the data within the document
       })
       return res.json(screams)
