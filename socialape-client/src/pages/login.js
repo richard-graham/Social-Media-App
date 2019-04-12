@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import withStyles from '@material-ui/core/styles/withStyles'
 import PropTypes from 'prop-types'
 import AppIcon from '../images/monkey-150958_1280.png'
-import axios from 'axios'
 import { Link } from 'react-router-dom'
 
 import Grid from '@material-ui/core/Grid'
@@ -58,7 +57,7 @@ export class login extends Component {
       <Grid container className={classes.form}>
         <Grid item sm />
         <Grid item sm>
-          <img src={AppIcon} alt='Monkey Image' className={classes.icon} />
+          <img src={AppIcon} alt='Monkey' className={classes.icon} />
           <Typography variant='h2' className={classes.pageTitle}>
             Login
           </Typography>
