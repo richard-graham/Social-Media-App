@@ -36,6 +36,9 @@ export default function(state = initialState, action){
     case UNLIKE_SCREAM: // in both cases do the same thing
       let index = state.screams.findIndex((scream) => scream.screamId === action.payload.screamId) //gives us the index from the scream passed into the action
       state.screams[index] = action.payload // replace it in state with the version with updated likes
+      if(state.scream.screamId === action.payload.screamId){
+        state.scream = action.payload
+      }
       return {
         ...state
       }
