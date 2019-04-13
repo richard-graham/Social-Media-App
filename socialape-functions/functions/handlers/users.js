@@ -184,7 +184,7 @@ exports.getUserDetails = (req, res) => {
           userHandle: scream.data().userHandle,
           userImage: scream.data().userImage,
           likeCount: scream.data().likeCount,
-          commentCount: scream.data().body,
+          commentCount: scream.data().commentCount,
           screamId: scream.id
         })
       })
