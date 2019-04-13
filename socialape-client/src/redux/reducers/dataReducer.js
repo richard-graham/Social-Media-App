@@ -5,7 +5,8 @@ import {
   LOADING_DATA, 
   DELETE_SCREAM,
   POST_SCREAM,
-  SET_SCREAM
+  SET_SCREAM,
+  SUBMIT_COMMENT
 } from '../types'
 
 const initialState = {
@@ -55,6 +56,14 @@ export default function(state = initialState, action){
           action.payload, //puts the new scream to the front 
           ...state.screams
         ]
+      }
+    case SUBMIT_COMMENT:
+      return {
+        ...state,
+        scream: {
+          ...state.scream,
+          comments: [action.payload, ...state.scream.comments] // put new comment to the top of the list in screamDialog
+        }
       }
     default:
      return state
