@@ -22,6 +22,8 @@ import axios from 'axios';
 
 const theme = createMuiTheme(themeFile)
 
+axios.defaults.baseUrl = 'https://us-central1-social-media-app-632e6.cloudfunctions.net/api'
+
 const token = localStorage.FBIdToken
 if(token){
   const decodedToken = jwtDecode(token) // decodedToken.exp hold the expiry time of the token
