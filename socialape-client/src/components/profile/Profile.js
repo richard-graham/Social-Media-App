@@ -107,7 +107,7 @@ class Profile extends Component {
         </div>
       </Paper>
     )) : (
-      ProfileSkeleton
+      <ProfileSkeleton />
     )
 
     return profileMarkup
