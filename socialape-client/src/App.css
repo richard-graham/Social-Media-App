@@ -12,7 +12,7 @@ body {
 
 .nav-container {
   margin: auto;
-
+  position: 'absolute';
 }
 
 .nav-container svg{

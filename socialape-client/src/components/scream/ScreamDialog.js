@@ -137,7 +137,7 @@ class ScreamDialog extends Component {
       </Grid>
     )
 
-    const button = this.props.buttonType ? (
+    const button = buttonType ? (
       <MyButton tip='Comments' onClick={this.handleOpen} >
         <ChatIcon color='primary' />
       </MyButton>
