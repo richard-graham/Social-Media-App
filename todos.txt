@@ -1,1 +1,1 @@
-Check why number don't show against likes and comments on page load
+Link comment button to open dialog
