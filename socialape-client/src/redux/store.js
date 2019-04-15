@@ -1,5 +1,5 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux'
-import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly'
+import { composeWithDevTools } from 'redux-devtools-extension'
 import thunk from 'redux-thunk'
 
 import dataReducer from './reducers/dataReducer'
@@ -20,8 +20,7 @@ const store = createStore(
   reducers, 
   initState, 
   composeWithDevTools(
-    applyMiddleware(...middleware), 
-    window.__REDUX_DEVTOOLS_EXTENSION__ ? window.__REDUX_DEVTOOLS_EXTENSION__() : f => f
+    applyMiddleware(...middleware)
   )
 )
 
