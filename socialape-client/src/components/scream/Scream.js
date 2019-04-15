@@ -81,9 +81,7 @@ class Scream extends Component {
           <Typography variant='body1'>{body}</Typography>
           <LikeButton screamId={screamId} />
           <span>{likeCount} Likes</span>
-          <MyButton tip='Comments'>
-            <ChatIcon color='primary' />
-          </MyButton>
+          <ScreamDialog screamId={screamId} userHandle={userHandle} openDialog={this.props.openDialog} buttonType='comment' />
           <span>{commentCount} Comments</span>
           <ScreamDialog screamId={screamId} userHandle={userHandle} openDialog={this.props.openDialog} />
         </CardContent>

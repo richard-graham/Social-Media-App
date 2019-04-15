@@ -94,7 +94,8 @@ class ScreamDialog extends Component {
         userHandle,
         comments
       },
-      UI: { loading }
+      UI: { loading },
+      buttonType
     } = this.props
 
     const dialogMarkup = loading ? (
@@ -135,11 +136,19 @@ class ScreamDialog extends Component {
         <Comments comments={comments} />
       </Grid>
     )
+
+    const button = this.props.buttonType ? (
+      <MyButton tip='Comments' onClick={this.handleOpen} >
+        <ChatIcon color='primary' />
+      </MyButton>
+    ) : (
+      <MyButton onClick={this.handleOpen} tip='Expand scream' tipClassName={classes.expandButton}>
+        <UnfoldMore color='primary' />
+      </MyButton>
+  )
     return (
       <Fragment>
-        <MyButton onClick={this.handleOpen} tip='Expand scream' tipClassName={classes.expandButton}>
-          <UnfoldMore color='primary' />
-        </MyButton>
+        {button}
         <Dialog
           open={this.state.open}
           onClose={this.handleClose}
